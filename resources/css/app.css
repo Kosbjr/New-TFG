@@ -9,3 +9,56 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+@layer components {
+
+    /*
+    CONTENEDOR CENTRADO
+     */
+    .auth-wrapper {
+        @apply min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-white;
+    }
+
+    /*
+    CARD
+     */
+    .card-custom {
+        @apply bg-white p-8 rounded-2xl shadow-xl w-full max-w-md;
+    }
+
+
+    /*
+
+    TITULO
+     */
+    .title-auth {
+        @apply text-2xl font-bold text-center text-teal-600 mb-6;
+    }
+
+    /*
+    INPUT
+    */
+    .input-custom {
+        @apply w-full border border-gray-200 rounded-lg p-2 mb-3 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200;
+    }
+
+    /*
+    BOTON
+    */
+    .btn-turquesa {
+        @apply w-full bg-teal-500 text-white py-2 rounded-lg hover:bg-teal-600 transition font-medium;
+    }
+
+    /*
+    LINK
+     */
+    .link-auth {
+        @apply text-teal-500 hover:underline text-sm;
+    }
+
+    /*
+    ERROR
+    */
+    .alert-error {
+        @apply bg-red-100 text-red-700 p-2 rounded mb-3 text-sm;
+    }
+}

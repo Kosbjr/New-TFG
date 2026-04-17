@@ -23,7 +23,7 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
+//Open street map //Mapbox  //PWA para instalar web en movil
     /**
      * Reverse the migrations.
      */

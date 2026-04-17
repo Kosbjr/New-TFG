@@ -12,7 +12,7 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
-
+    protected $table = 'usuarios';
     /**
      * The attributes that are mass assignable.
      *
@@ -59,5 +59,9 @@ class User extends Authenticatable
     public function mensajesEnviados()
     {
         return $this->hasMany(Mensaje::class, 'usuario_id');
+    }
+    public function valoraciones()
+    {
+        return $this->hasMany(Valoracion::class, 'usuario_id');
     }
 }

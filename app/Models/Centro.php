@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,5 +32,14 @@ class Centro extends Model
     public function mensajesRecibidos()
     {
         return $this->hasMany(Mensaje::class);
+    }
+    public function servicios()
+    {
+        return $this->hasMany(Servicio::class);
+    }
+
+    public function valoraciones()
+    {
+        return $this->hasMany(Valoracion::class);
     }
 }

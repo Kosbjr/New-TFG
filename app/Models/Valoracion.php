@@ -4,16 +4,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Cita extends Model
+class Valoracion extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
+        'puntuacion',
+        'comentario',
         'usuario_id',
-        'centro_id',
-        'fecha',
-        'hora',
-        'estado',
+        'centro_id'
     ];
 
     public function usuario()
@@ -23,7 +20,6 @@ class Cita extends Model
 
     public function centro()
     {
-        return $this->belongsTo(Centro::class, 'centro_id');
+        return $this->belongsTo(Centro::class);
     }
-
 }
