@@ -12,6 +12,7 @@ class Mensaje extends Model
         'usuario_id',
         'centro_id',
         'mensaje',
+        'remitente',
         'leido',
     ];
 

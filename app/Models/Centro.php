@@ -42,4 +42,16 @@ class Centro extends Model
     {
         return $this->hasMany(Valoracion::class);
     }
+    public function fotos()
+    {
+        return $this->hasMany(FotoCentro::class)->orderBy('orden');
+    }
+    public function horarios()
+    {
+        return $this->hasMany(HorarioDisponible::class);
+    }
+    public function categorias()
+    {
+        return $this->belongsToMany(Categoria::class, 'categoria_centro');
+    }
 }

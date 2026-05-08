@@ -19,4 +19,8 @@ class Servicio extends Model
     {
         return $this->belongsTo(Centro::class);
     }
+    public function citas()
+{
+    return $this->hasMany(Cita::class);
+}
 }

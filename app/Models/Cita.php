@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,10 +12,17 @@ class Cita extends Model
     protected $fillable = [
         'usuario_id',
         'centro_id',
+        'servicio_id',
         'fecha',
         'hora',
         'estado',
+        'notas',
     ];
+
+    public function servicio()
+    {
+        return $this->belongsTo(Servicio::class);
+    }
 
     public function usuario()
     {
@@ -25,5 +33,4 @@ class Cita extends Model
     {
         return $this->belongsTo(Centro::class, 'centro_id');
     }
-
 }
