@@ -46,7 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/centro/horarios',         [ServicioController::class, 'storeHorario'])->name('horarios.store');
     Route::delete('/centro/horarios/{id}',  [ServicioController::class, 'destroyHorario'])->name('horarios.destroy');
 
-    // Ruta con parámetro SIEMPRE al final
+
     Route::get('/centro/{id}',              [CentroController::class, 'show'])->name('centro.show');
 
     // Citas
@@ -61,7 +61,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-// Panel admin (sin middleware de rol por ahora, añádelo si tienes)
+// Panel admin (categoria)
 Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/categorias',          [CategoriaController::class, 'categorias'])->name('admin.categorias');
     Route::post('/categorias',         [CategoriaController::class, 'storeCategoria'])->name('admin.categorias.store');
