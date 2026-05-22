@@ -10,7 +10,7 @@
     <h1 class="fw-medium mb-3">Reserva, gestiona y conecta<br>con tu centro favorito</h1>
     <p class="text-muted mb-4">Encuentra peluquerías, centros de estética, fisioterapia y más.<br>Reserva tu cita en segundos.</p>
     <a href="{{ auth()->check() ? route('home') : route('register') }}" class="btn btn-dark me-2">
-        Empezar gratis
+        Empezar ahora
     </a>
     <a href="{{ auth()->check() ? route('home') : route('login') }}" class="btn btn-outline-secondary">
         Ver centros
