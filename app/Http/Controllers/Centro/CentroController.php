@@ -42,28 +42,22 @@ class CentroController extends Controller
         );
     }
 
-    public function update(
-        UpdateCentroRequest $request
-    ) {
+    public function update(UpdateCentroRequest $request)
+{
+    $data = $request->validated();
 
-        $dto = ActualizarCentroDTO::fromArray(
-            $request->validated()
-        );
+    $data['fotos'] = $request->file('fotos', []);
 
-        $this
-            ->actualizarCentroAction
-            ->execute(
-                Auth::id(),
-                $dto
-            );
+    $dto = ActualizarCentroDTO::fromArray($data);
 
-        return redirect()
-            ->route('home')
-            ->with(
-                'success',
-                'Información actualizada correctamente.'
-            );
-    }
+    $this->actualizarCentroAction->execute(
+        Auth::id(),
+        $dto
+    );
+
+    return redirect()->route('home')
+        ->with('success', 'Información actualizada correctamente.');
+}
 
     public function show(int $id)
     {
@@ -92,17 +86,17 @@ class CentroController extends Controller
         );
     }
     public function updateCategorias(Request $request)
-{
-    $request->validate([
-        'categorias'   => 'nullable|array',
-        'categorias.*' => 'exists:categorias,id',
-    ]);
+    {
+        $request->validate([
+            'categorias'   => 'nullable|array',
+            'categorias.*' => 'exists:categorias,id',
+        ]);
 
-    $centro = \App\Models\Centro::where('usuario_id', Auth::id())
-        ->firstOrFail();
+        $centro = \App\Models\Centro::where('usuario_id', Auth::id())
+            ->firstOrFail();
 
-    $centro->categorias()->sync($request->categorias ?? []);
+        $centro->categorias()->sync($request->categorias ?? []);
 
-    return back()->with('success', 'Categorías actualizadas.');
-}
+        return back()->with('success', 'Categorías actualizadas.');
+    }
 }

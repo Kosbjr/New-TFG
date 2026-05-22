@@ -10,10 +10,30 @@
         <div class="card border-0 shadow-sm p-3 mb-2 d-flex flex-row align-items-center gap-3"
              style="border-radius: 12px;">
 
+            {{-- cambia la foto dependiendo si es un centro o cliente--}}
             <div style="width: 48px; height: 48px; border-radius: 50%;
                         background: #e9ecef; display: flex; align-items: center;
-                        justify-content: center; font-size: 22px; flex-shrink: 0;">
-                ✂️
+                        justify-content: center; overflow: hidden; flex-shrink: 0;">
+
+                @if(auth()->user()->rol === 'centro')
+                    {{-- Si el usuario conectado es el centro, muestra el icono de un cliente --}}
+                    <i class="bi bi-person" style="font-size: 22px;"></i>
+                @else
+                    {{-- Si es un cliente, busca la foto principal del centro --}}
+                    @php
+                        $fotos = $conv->centro->fotosCentro ?? $conv->centro->fotos ?? collect();
+                        $fotoPerfil = $fotos->firstWhere('orden', 0);
+                    @endphp
+
+                    @if ($fotoPerfil)
+                        <img src="{{ asset('storage/' . $fotoPerfil->ruta) }}" alt="avatar"
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                    @else
+                        {{-- Icono por defecto de tienda si no tiene foto --}}
+                        <i class="bi bi-shop" style="font-size: 22px;"></i>
+                    @endif
+                @endif
+
             </div>
 
             <div class="flex-grow-1">

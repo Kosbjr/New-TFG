@@ -22,7 +22,7 @@
     @else
         <div class="d-flex align-items-center justify-content-center mb-4"
             style="height: 250px; background: #f5f5f5; border-radius: 12px;">
-            <span style="font-size: 64px;">✂️</span>
+            <span style="font-size: 64px;"><i class="bi bi-scissors"></i></span>
         </div>
     @endif
 
@@ -43,19 +43,21 @@
 
             <h5 class="mb-3">Información</h5>
 
-            @if ($centro->direccion)
+            @if ($centro->ubicacion)
                 <div class="d-flex align-items-start gap-2 mb-2">
-                    <span>📍</span>
-                    <a href="https://www.google.com/maps/search/{{ urlencode($centro->direccion) }}" target="_blank"
-                        class="text-decoration-none">
-                        {{ $centro->direccion }}
+                    <span><i class="bi bi-pin-map-fill"></i></span>
+
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($centro->ubicacion) }}"
+                        target="_blank" class="text-decoration-none">
+
+                        {{ $centro->ubicacion }}
                     </a>
                 </div>
             @endif
 
             @if ($centro->telefono)
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <span>📞</span>
+                    <span><i class="bi bi-telephone"></i></span>
                     <span>{{ $centro->telefono }}</span>
                 </div>
             @endif
@@ -63,11 +65,11 @@
             @auth
                 @if (auth()->user()->rol === 'cliente')
                     <a href="{{ route('citas.create', $centro->id) }}" class="btn btn-primary w-100 mt-2">
-                        📅 Agendar cita
+                        <i class="bi bi-calendar-plus"></i>  Agendar cita
                     </a>
                     <a href="{{ route('mensajes.chat', ['centroId' => $centro->id, 'usuarioId' => auth()->id()]) }}"
                         class="btn btn-outline-primary w-100 mt-2">
-                        💬 Contactar
+                        <i class="bi bi-chat-dots"></i> Contactar
                     </a>
                 @endif
             @endauth

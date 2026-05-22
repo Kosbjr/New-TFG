@@ -15,7 +15,8 @@ class ActualizarCentroAction
 
     public function execute(
         int $usuarioId,
-        ActualizarCentroDTO $dto
+        ActualizarCentroDTO $dto,
+
     ) {
         $centro = $this->repository
             ->actualizarOCrear(
@@ -23,6 +24,7 @@ class ActualizarCentroAction
                 [
                     'nombre' => $dto->nombre,
                     'direccion' => $dto->direccion,
+                    'ubicacion' => $dto->ubicacion,
                     'telefono' => $dto->telefono,
                     'descripcion' => $dto->descripcion,
                 ]

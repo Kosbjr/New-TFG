@@ -4,18 +4,29 @@ namespace App\Http\Controllers\Home;
 
 use App\Http\Controllers\Controller;
 use App\Models\Centro;
+use App\Models\Categoria;
+use Illuminate\Http\Request; // Importamos la clase Request
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    public function index()
+    // Añadimos el Request $request como parámetro
+    public function index(Request $request)
     {
         $user = auth()->user();
 
         if (!$user) {
             return view('home', [
                 'modo' => 'guest',
-                'centros' => Centro::latest()->with('fotos')->take(6)->get(),
+                'centros' => Centro::latest()
+                    ->with('fotos')
+                    // Filtro de búsqueda para invitados
+                    ->when($request->filled('buscar'), function ($q) use ($request) {
+                        $q->where('nombre', 'like', '%' . $request->buscar . '%')
+                          ->orWhere('descripcion', 'like', '%' . $request->buscar . '%');
+                    })
+                    ->take(6)
+                    ->get(),
             ]);
         }
 
@@ -30,13 +41,22 @@ class HomeController extends Controller
                 'modo'       => 'cliente',
                 'centros'    => Centro::latest()
                     ->with(['fotos', 'categorias'])
-                    ->when(request('categoria'), function ($q) {
-                        $q->whereHas('categorias', function ($q) {
-                            $q->where('slug', request('categoria'));
+                    // Filtro de categorías existente
+                    ->when($request->categoria, function ($q) use ($request) {
+                        $q->whereHas('categorias', function ($q) use ($request) {
+                            $q->where('slug', $request->categoria);
                         });
                     })
-                    ->take(12)->get(),
-                'categorias' => \App\Models\Categoria::all(),
+                    // NUEVO: Filtro de búsqueda por nombre o descripción
+                    ->when($request->filled('buscar'), function ($q) use ($request) {
+                        $q->where(function ($subquery) use ($request) {
+                            $subquery->where('nombre', 'like', '%' . $request->buscar . '%')
+                                     ->orWhere('descripcion', 'like', '%' . $request->buscar . '%');
+                        });
+                    })
+                    ->take(12)
+                    ->get(),
+                'categorias' => Categoria::all(),
             ]),
         };
     }

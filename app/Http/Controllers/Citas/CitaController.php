@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Citas;
 use App\Http\Controllers\Controller;
 use App\Models\Cita;
 use App\Models\Centro;
+use App\Models\Servicio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,17 +44,39 @@ class CitaController extends Controller
             'servicio_id' => 'required|exists:servicios,id',
             'fecha'       => 'required|date|after_or_equal:today',
             'hora'        => 'required',
-            'notas'       => 'nullable|string|max:500',
+            'notes'       => 'nullable|string|max:500',
         ]);
 
-        $ocupado = Cita::where('centro_id', $id)
-                       ->where('fecha', $request->fecha)
-                       ->where('hora', $request->hora)
-                       ->whereIn('estado', ['pendiente', 'confirmada'])
-                       ->exists();
+        // Buscamos la duración del servicio que el cliente quiere reservar
+        $servicioSolicitado = Servicio::findOrFail($request->servicio_id);
+        $duracionSolicitada = $servicioSolicitado->duracion;
+
+        $horaInicioSolicitada = Carbon::parse($request->fecha . ' ' . $request->hora);
+        $horaFinSolicitada = (clone $horaInicioSolicitada)->addMinutes($duracionSolicitada);
+
+        // Traemos las citas activas del centro para ese día específico
+        $citasExistentes = Cita::where('centro_id', $id)
+                               ->where('fecha', $request->fecha)
+                               ->whereIn('estado', ['pendiente', 'confirmada'])
+                               ->with('servicio')
+                               ->get();
+
+        $ocupado = false;
+
+        foreach ($citasExistentes as $cita) {
+            $citaInicio = Carbon::parse($cita->fecha . ' ' . $cita->hora);
+            $citaFin = (clone $citaInicio)->addMinutes($cita->servicio->duracion);
+
+            // COMPROBACIÓN DE SOLAPAMIENTO:
+            // Si la nueva cita empieza antes de que termine la vieja, y termina después de que empiece la vieja
+            if ($horaInicioSolicitada->lessThan($citaFin) && $horaFinSolicitada->greaterThan($citaInicio)) {
+                $ocupado = true;
+                break;
+            }
+        }
 
         if ($ocupado) {
-            return back()->withErrors(['hora' => 'Este horario ya está reservado.']);
+            return back()->withErrors(['hora' => 'Este horario o parte de él ya se encuentra ocupado por otro servicio.']);
         }
 
         Cita::create([
@@ -86,25 +109,49 @@ class CitaController extends Controller
         $huecos = [];
         $dias   = collect($centro->horarios)->groupBy('dia_semana');
 
+        // Cargamos todas las citas activas de los próximos 14 días para procesarlas en memoria
+        $citasFuturas = Cita::where('centro_id', $centro->id)
+                            ->where('fecha', '>=', Carbon::today()->toDateString())
+                            ->where('fecha', '<=', Carbon::today()->addDays(14)->toDateString())
+                            ->whereIn('estado', ['pendiente', 'confirmada'])
+                            ->with('servicio')
+                            ->get()
+                            ->groupBy('fecha');
+
         for ($i = 0; $i < 14; $i++) {
             $fecha     = Carbon::today()->addDays($i);
+            $fechaStr  = $fecha->toDateString();
             $diaSemana = $fecha->dayOfWeek === 0 ? 6 : $fecha->dayOfWeek - 1;
 
             if (!$dias->has($diaSemana)) continue;
+
+            // Citas que ya están agendadas para este día específico del bucle
+            $citasDelDia = $citasFuturas->get($fechaStr, collect());
 
             foreach ($dias[$diaSemana] as $horario) {
                 $inicio = Carbon::parse($horario->hora_inicio);
                 $fin    = Carbon::parse($horario->hora_fin);
 
                 while ($inicio < $fin) {
-                    $ocupado = Cita::where('centro_id', $centro->id)
-                                   ->where('fecha', $fecha->toDateString())
-                                   ->where('hora', $inicio->format('H:i'))
-                                   ->whereIn('estado', ['pendiente', 'confirmada'])
-                                   ->exists();
+                    $horaActualStr = $inicio->format('H:i');
+                    $horaActualCarbon = Carbon::parse($fechaStr . ' ' . $horaActualStr);
+                    $colisiona = false;
 
-                    if (!$ocupado) {
-                        $huecos[$fecha->toDateString()][] = $inicio->format('H:i');
+                    // Comprobamos si el minuto actual cae dentro de la duración de alguna cita previa
+                    foreach ($citasDelDia as $cita) {
+                        $citaInicio = Carbon::parse($cita->fecha . ' ' . $cita->hora);
+                        $citaFin = (clone $citaInicio)->addMinutes($cita->servicio->duracion);
+
+                        // Si la hora del hueco es igual o mayor al inicio de una cita, pero menor que su finalización
+                        if ($horaActualCarbon->greaterThanOrEqualTo($citaInicio) && $horaActualCarbon->lessThan($citaFin)) {
+                            $colisiona = true;
+                            break;
+                        }
+                    }
+
+                    // Si ningún servicio está ocupando este bloque de tiempo, se añade como disponible
+                    if (!$colisiona) {
+                        $huecos[$fechaStr][] = $horaActualStr;
                     }
 
                     $inicio->addMinutes($horario->intervalo_minutos);

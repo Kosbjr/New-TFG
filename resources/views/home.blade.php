@@ -83,7 +83,7 @@
             <i class="bi bi-tools"></i> Gestionar servicios y horarios
         </a>
 
-        {{-- SECCIÓN: SOBRE TI --}}
+        {{-- sobre ti--}}
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Sobre ti</h5>
@@ -109,12 +109,12 @@
                         <dt class="col-sm-3">Descripción</dt>
                         <dd class="col-sm-9">{{ $centro->descripcion ?? '—' }}</dd>
 
-                        @if ($centro->direccion)
+                        @if ($centro->ubicacion)
                             <dt class="col-sm-3">Ubicación</dt>
                             <dd class="col-sm-9">
-                                <a href="https://www.google.com/maps/search/{{ urlencode($centro->direccion) }}"
+                                <a href="https://www.google.com/maps/search/{{ urlencode($centro->ubicacion) }}"
                                     target="_blank">
-                                    <i class="bi bi-geo-alt"></i> {{ $centro->direccion }}
+                                    <i class="bi bi-geo-alt"></i> {{ $centro->ubicacion}}
                                 </a>
                             </dd>
                         @endif

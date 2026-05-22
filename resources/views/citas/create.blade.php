@@ -91,10 +91,10 @@
         <div class="card border-0 shadow-sm p-4" style="border-radius:12px">
             <h6 class="mb-3">{{ $centro->nombre }}</h6>
             @if($centro->direccion)
-                <p class="text-muted small mb-1">📍 {{ $centro->direccion }}</p>
+                <p class="text-muted small mb-1"><i class="bi bi-pin-map-fill"> </i>{{ $centro->direccion }} </p>
             @endif
             @if($centro->telefono)
-                <p class="text-muted small mb-0">📞 {{ $centro->telefono }}</p>
+                <p class="text-muted small mb-0"><i class="bi bi-telephone"> </i>{{ $centro->telefono }} </p>
             @endif
         </div>
     </div>

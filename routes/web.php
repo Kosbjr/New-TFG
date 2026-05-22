@@ -11,7 +11,8 @@ use App\Http\Controllers\Mensajes\MensajeController;
 use App\Http\Controllers\Admin\CategoriaController;
 // Web pública
 Route::get('/', function () {
-    return view('landing');
+    $categorias = \App\Models\Categoria::all();
+    return view('landing', compact('categorias'));
 });
 
 // Autenticación

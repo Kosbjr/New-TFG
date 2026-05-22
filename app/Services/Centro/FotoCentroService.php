@@ -8,25 +8,20 @@ use Illuminate\Support\Facades\Storage;
 
 class FotoCentroService
 {
-    public function guardarFotos(
-        Centro $centro,
-        array $fotos
-    ): void {
-        $orden = $centro->fotos()->count();
+    public function guardarFotos(Centro $centro, array $fotos): void
+{
+    $orden = $centro->fotosCentro()->count();
 
-        foreach ($fotos as $foto) {
+    foreach ($fotos as $foto) {
 
-            $ruta = $foto->store(
-                'centros',
-                'public'
-            );
+        $ruta = $foto->store('centros', 'public');
 
-            $centro->fotos()->create([
-                'ruta' => $ruta,
-                'orden' => $orden++,
-            ]);
-        }
+        $centro->fotosCentro()->create([
+            'ruta' => $ruta,
+            'orden' => $orden++,
+        ]);
     }
+}
 
     public function eliminarFoto($foto): void
     {

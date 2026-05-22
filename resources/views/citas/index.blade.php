@@ -23,7 +23,7 @@
                     @endif
 
                     <p class="mb-1 text-muted small mt-1">
-                        📅 {{ \Carbon\Carbon::parse($cita->fecha)->format('d/m/Y') }}
+                        <i class="bi bi-calendar-plus"></i> {{ \Carbon\Carbon::parse($cita->fecha)->format('d/m/Y') }}
                         · 🕐 {{ $cita->hora }}
                         @if ($cita->servicio)
                             · {{ number_format($cita->servicio->precio, 2) }}€

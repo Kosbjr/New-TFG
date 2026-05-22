@@ -1,4 +1,4 @@
-<div wire:poll.5s>
+<div wire:poll.4s>
     {{-- Lista de mensajes --}}
     <div id="chat-box"
          style="height: 420px; overflow-y: auto; padding: 1rem;

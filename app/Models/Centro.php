@@ -15,6 +15,7 @@ class Centro extends Model
         'direccion',
         'telefono',
         'descripcion',
+        'ubicacion',
         'latitud',
         'longitud',
     ];
@@ -45,6 +46,10 @@ class Centro extends Model
     public function fotos()
     {
         return $this->hasMany(FotoCentro::class)->orderBy('orden');
+    }
+    public function fotosCentro()
+    {
+        return $this->fotos();
     }
     public function horarios()
     {
