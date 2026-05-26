@@ -24,14 +24,14 @@
 
                     <p class="mb-1 text-muted small mt-1">
                         <i class="bi bi-calendar-plus"></i> {{ \Carbon\Carbon::parse($cita->fecha)->format('d/m/Y') }}
-                        · 🕐 {{ $cita->hora }}
+                        <i class="bi bi-arrow-right"></i> <i class="bi bi-alarm"></i> {{ $cita->hora }}
                         @if ($cita->servicio)
                             · {{ number_format($cita->servicio->precio, 2) }}€
                         @endif
                     </p>
 
                     @if ($cita->notas)
-                        <p class="mb-0 small text-muted">📝 {{ $cita->notas }}</p>
+                        <p class="mb-0 small text-muted"><i class="bi bi-pencil-square"></i> {{ $cita->notas }}</p>
                     @endif
                 </div>
 
@@ -73,7 +73,7 @@
                     @endphp
                     <a href="{{ route('mensajes.chat', ['centroId' => $cita->centro_id, 'usuarioId' => $usuarioId]) }}"
                         class="btn btn-sm btn-outline-primary mt-2">
-                        💬 Mensaje
+                        <i class="bi bi-chat-dots"></i> Mensaje
                     </a>
                 </div>
             </div>

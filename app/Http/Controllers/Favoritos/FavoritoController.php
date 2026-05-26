@@ -2,38 +2,30 @@
 
 namespace App\Http\Controllers\Favoritos;
 
+use App\Actions\Favoritos\ObtenerFavoritosAction;
+use App\Actions\Favoritos\ToggleFavoritoAction;
 use App\Http\Controllers\Controller;
-use App\Models\Favorito;
-use App\Models\Centro;
 use Illuminate\Support\Facades\Auth;
 
 class FavoritoController extends Controller
 {
+    public function __construct(
+        protected ObtenerFavoritosAction $obtenerFavoritosAction,
+        protected ToggleFavoritoAction   $toggleFavoritoAction,
+    ) {}
+
     public function index()
     {
-        $favoritos = Favorito::where('usuario_id', Auth::id())
-                             ->with(['centro.fotos', 'centro.categorias'])
-                             ->get();
+        $favoritos = $this->obtenerFavoritosAction
+            ->execute(Auth::id());
 
         return view('favoritos.index', compact('favoritos'));
     }
 
-    public function toggle($centroId)
+    public function toggle(int $centroId)
     {
-        $existe = Favorito::where('usuario_id', Auth::id())
-                          ->where('centro_id', $centroId)
-                          ->first();
-
-        if ($existe) {
-            $existe->delete();
-            $esFavorito = false;
-        } else {
-            Favorito::create([
-                'usuario_id' => Auth::id(),
-                'centro_id'  => $centroId,
-            ]);
-            $esFavorito = true;
-        }
+        $esFavorito = $this->toggleFavoritoAction
+            ->execute(Auth::id(), $centroId);
 
         if (request()->ajax()) {
             return response()->json(['favorito' => $esFavorito]);

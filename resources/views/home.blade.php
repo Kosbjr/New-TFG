@@ -4,7 +4,7 @@
 
 @section('content')
 
-    <h2>BIENVENID@</h2>
+    <h2>BIENVENID@ A GlowMe</h2>
 
     @if ($modo === 'cliente')
         {{-- Filtro de categorías --}}
@@ -71,7 +71,6 @@
                 </div>
             @endforeach
         </div>
-
     @else
         <h3>Panel del centro</h3>
 
@@ -83,7 +82,7 @@
             <i class="bi bi-tools"></i> Gestionar servicios y horarios
         </a>
 
-        {{-- sobre ti--}}
+        {{-- sobre ti --}}
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Sobre ti</h5>
@@ -114,24 +113,36 @@
                             <dd class="col-sm-9">
                                 <a href="https://www.google.com/maps/search/{{ urlencode($centro->ubicacion) }}"
                                     target="_blank">
-                                    <i class="bi bi-geo-alt"></i> {{ $centro->ubicacion}}
+                                    <i class="bi bi-geo-alt"></i> {{ $centro->ubicacion }}
                                 </a>
                             </dd>
                         @endif
                     </dl>
 
                     @if ($centro->fotos->count())
-                        <div class="row g-2 mt-3">
-                            @foreach ($centro->fotos as $index => $foto)
-                                <div class="{{ $index === 0 ? 'col-12' : 'col-4' }}">
-                                    <img src="{{ asset('storage/' . $foto->ruta) }}" alt="{{ $centro->nombre }}"
-                                        style="width: 100%; height: {{ $index === 0 ? '350px' : '120px' }};
-                                               object-fit: cover; border-radius: 10px;">
-                                </div>
-                            @endforeach
+                        {{-- Foto principal --}}
+                        @php $fotoPrincipal = $centro->fotos->firstWhere('orden', 0) ?? $centro->fotos->first(); @endphp
+                        <div class="mb-3">
+                            <img src="{{ asset('storage/' . $fotoPrincipal->ruta) }}" alt="{{ $centro->nombre }}"
+                                style="width: 100%; height: 350px; object-fit: cover; border-radius: 10px;">
                         </div>
+                        <hr>
+                        {{-- Galería --}}
+                        @php $galeria = $centro->fotos->where('orden', '>', 0); @endphp
+                        @if ($galeria->count())
+                            <h6 class="text-muted small text-uppercase fw-medium mb-2">Galería</h6>
+                            <div class="row g-2">
+                                @foreach ($galeria as $foto)
+                                    <div class="col-3">
+                                        <img src="{{ asset('storage/' . $foto->ruta) }}" alt="{{ $centro->nombre }}"
+                                            style="width: 100%; height: 250px; object-fit: cover; border-radius: 6px;
+                            cursor: pointer; transition: opacity 0.2s;"
+                                            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     @endif
-
                 @else
                     <p class="text-muted mb-3">
                         Aún no has completado la información de tu centro.
@@ -141,6 +152,52 @@
                         <i class="bi bi-plus-circle"></i> Añadir información
                     </a>
                 @endif
+            </div>
+        </div>
+        {{-- Zona de Borado de cuenta --}}
+
+        <div class="card-body">
+
+
+            <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalEliminarCuenta">
+                <i class="bi bi-trash"></i> Eliminar cuenta
+            </button>
+        </div>
+
+
+        {{-- Modal de confirmación --}}
+        <div class="modal fade" id="modalEliminarCuenta" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title text-danger">¿Eliminar cuenta?</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small">Esta acción es irreversible.
+                        <p class="text-muted small mb-3">
+                            Al eliminar tu cuenta se borrarán todos tus datos, fotos, servicios y citas de forma permanente.
+                        </p> Introduce tu contraseña para confirmar.</p>
+                        <form action="{{ route('cuenta.destroy') }}" method="POST" id="formEliminarCuenta">
+                            @csrf
+                            @method('DELETE')
+                            <div class="mb-3">
+                                <input type="password" name="password" class="form-control"
+                                    placeholder="Tu contraseña actual" required>
+                                @error('password')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                            data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" form="formEliminarCuenta" class="btn btn-danger btn-sm">
+                            Sí, eliminar mi cuenta
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 

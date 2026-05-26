@@ -21,6 +21,7 @@ Route::get('/login',    [LoginController::class, 'show'])->name('login');
 Route::post('/login',   [LoginController::class, 'login']);
 Route::get('/register', [RegistroController::class, 'show'])->name('register');
 Route::post('/register', [RegistroController::class, 'store']);
+Route::delete('/cuenta', [RegistroController::class, 'destroy'])->name('cuenta.destroy');
 
 // App
 Route::middleware('auth')->group(function () {

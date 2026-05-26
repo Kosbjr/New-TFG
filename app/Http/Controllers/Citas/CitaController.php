@@ -1,164 +1,81 @@
 <?php
+
 namespace App\Http\Controllers\Citas;
 
+use App\Actions\Citas\ObtenerCitasAction;
+use App\Actions\Citas\GenerarHuecosAction;
+use App\Actions\Citas\CrearCitaAction;
+use App\Actions\Citas\ActualizarEstadoCitaAction;
+use App\DTOs\Citas\CrearCitaDTO;
+use App\DTOs\Citas\ActualizarEstadoCitaDTO;
 use App\Http\Controllers\Controller;
-use App\Models\Cita;
 use App\Models\Centro;
-use App\Models\Servicio;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CitaController extends Controller
 {
+    public function __construct(
+        protected ObtenerCitasAction         $obtenerCitasAction,
+        protected GenerarHuecosAction        $generarHuecosAction,
+        protected CrearCitaAction            $crearCitaAction,
+        protected ActualizarEstadoCitaAction $actualizarEstadoCitaAction,
+    ) {}
+
     public function index()
     {
-        $user = Auth::user();
-
-        if ($user->rol === 'centro') {
-            $centro = Centro::where('usuario_id', $user->id)->firstOrFail();
-            $citas  = Cita::where('centro_id', $centro->id)
-                          ->with(['usuario', 'servicio'])
-                          ->orderBy('fecha')->orderBy('hora')
-                          ->get();
-        } else {
-            $citas = Cita::where('usuario_id', $user->id)
-                         ->with(['centro', 'servicio'])
-                         ->orderBy('fecha')->orderBy('hora')
-                         ->get();
-        }
+        $user  = Auth::user();
+        $citas = $this->obtenerCitasAction->execute($user->id, $user->rol);
 
         return view('citas.index', compact('citas', 'user'));
     }
 
-    public function create($id)
+    public function create(int $id)
     {
         $centro = Centro::with(['servicios', 'horarios'])->findOrFail($id);
-        $huecos = $this->generarHuecos($centro);
+        $huecos = $this->generarHuecosAction->execute($centro);
+
         return view('citas.create', compact('centro', 'huecos'));
     }
 
-    public function store(Request $request, $id)
+    public function store(Request $request, int $id)
     {
         $request->validate([
             'servicio_id' => 'required|exists:servicios,id',
             'fecha'       => 'required|date|after_or_equal:today',
             'hora'        => 'required',
-            'notes'       => 'nullable|string|max:500',
+            'notas'       => 'nullable|string|max:500',
         ]);
 
-        // Buscamos la duración del servicio que el cliente quiere reservar
-        $servicioSolicitado = Servicio::findOrFail($request->servicio_id);
-        $duracionSolicitada = $servicioSolicitado->duracion;
+        $dto = CrearCitaDTO::fromArray(Auth::id(), $id, $request->only([
+            'servicio_id', 'fecha', 'hora', 'notas'
+        ]));
 
-        $horaInicioSolicitada = Carbon::parse($request->fecha . ' ' . $request->hora);
-        $horaFinSolicitada = (clone $horaInicioSolicitada)->addMinutes($duracionSolicitada);
+        $creada = $this->crearCitaAction->execute($dto);
 
-        // Traemos las citas activas del centro para ese día específico
-        $citasExistentes = Cita::where('centro_id', $id)
-                               ->where('fecha', $request->fecha)
-                               ->whereIn('estado', ['pendiente', 'confirmada'])
-                               ->with('servicio')
-                               ->get();
-
-        $ocupado = false;
-
-        foreach ($citasExistentes as $cita) {
-            $citaInicio = Carbon::parse($cita->fecha . ' ' . $cita->hora);
-            $citaFin = (clone $citaInicio)->addMinutes($cita->servicio->duracion);
-
-            // COMPROBACIÓN DE SOLAPAMIENTO:
-            // Si la nueva cita empieza antes de que termine la vieja, y termina después de que empiece la vieja
-            if ($horaInicioSolicitada->lessThan($citaFin) && $horaFinSolicitada->greaterThan($citaInicio)) {
-                $ocupado = true;
-                break;
-            }
+        if (!$creada) {
+            return back()->withErrors([
+                'hora' => 'Este horario o parte de él ya se encuentra ocupado por otro servicio.'
+            ]);
         }
-
-        if ($ocupado) {
-            return back()->withErrors(['hora' => 'Este horario o parte de él ya se encuentra ocupado por otro servicio.']);
-        }
-
-        Cita::create([
-            'usuario_id'  => Auth::id(),
-            'centro_id'   => $id,
-            'servicio_id' => $request->servicio_id,
-            'fecha'       => $request->fecha,
-            'hora'        => $request->hora,
-            'estado'      => 'pendiente',
-            'notas'       => $request->notas,
-        ]);
 
         return redirect()->route('citas')->with('success', 'Cita solicitada correctamente.');
     }
 
-    public function updateEstado(Request $request, $id)
+    public function updateEstado(Request $request, int $id)
     {
-        $cita   = Cita::findOrFail($id);
-        $centro = Centro::where('usuario_id', Auth::id())->firstOrFail();
-        abort_if($cita->centro_id !== $centro->id, 403);
+        $request->validate([
+            'estado' => 'required|in:confirmada,cancelada'
+        ]);
 
-        $request->validate(['estado' => 'required|in:confirmada,cancelada']);
-        $cita->update(['estado' => $request->estado]);
+        $dto = ActualizarEstadoCitaDTO::fromArray([
+            'cita_id'    => $id,
+            'usuario_id' => Auth::id(),
+            'estado'     => $request->estado,
+        ]);
+
+        $this->actualizarEstadoCitaAction->execute($dto);
 
         return back()->with('success', 'Estado actualizado.');
-    }
-
-    private function generarHuecos(Centro $centro): array
-    {
-        $huecos = [];
-        $dias   = collect($centro->horarios)->groupBy('dia_semana');
-
-        // Cargamos todas las citas activas de los próximos 14 días para procesarlas en memoria
-        $citasFuturas = Cita::where('centro_id', $centro->id)
-                            ->where('fecha', '>=', Carbon::today()->toDateString())
-                            ->where('fecha', '<=', Carbon::today()->addDays(14)->toDateString())
-                            ->whereIn('estado', ['pendiente', 'confirmada'])
-                            ->with('servicio')
-                            ->get()
-                            ->groupBy('fecha');
-
-        for ($i = 0; $i < 14; $i++) {
-            $fecha     = Carbon::today()->addDays($i);
-            $fechaStr  = $fecha->toDateString();
-            $diaSemana = $fecha->dayOfWeek === 0 ? 6 : $fecha->dayOfWeek - 1;
-
-            if (!$dias->has($diaSemana)) continue;
-
-            // Citas que ya están agendadas para este día específico del bucle
-            $citasDelDia = $citasFuturas->get($fechaStr, collect());
-
-            foreach ($dias[$diaSemana] as $horario) {
-                $inicio = Carbon::parse($horario->hora_inicio);
-                $fin    = Carbon::parse($horario->hora_fin);
-
-                while ($inicio < $fin) {
-                    $horaActualStr = $inicio->format('H:i');
-                    $horaActualCarbon = Carbon::parse($fechaStr . ' ' . $horaActualStr);
-                    $colisiona = false;
-
-                    // Comprobamos si el minuto actual cae dentro de la duración de alguna cita previa
-                    foreach ($citasDelDia as $cita) {
-                        $citaInicio = Carbon::parse($cita->fecha . ' ' . $cita->hora);
-                        $citaFin = (clone $citaInicio)->addMinutes($cita->servicio->duracion);
-
-                        // Si la hora del hueco es igual o mayor al inicio de una cita, pero menor que su finalización
-                        if ($horaActualCarbon->greaterThanOrEqualTo($citaInicio) && $horaActualCarbon->lessThan($citaFin)) {
-                            $colisiona = true;
-                            break;
-                        }
-                    }
-
-                    // Si ningún servicio está ocupando este bloque de tiempo, se añade como disponible
-                    if (!$colisiona) {
-                        $huecos[$fechaStr][] = $horaActualStr;
-                    }
-
-                    $inicio->addMinutes($horario->intervalo_minutos);
-                }
-            }
-        }
-
-        return $huecos;
     }
 }
