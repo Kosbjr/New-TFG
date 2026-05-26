@@ -43,32 +43,35 @@ class CentroController extends Controller
     }
 
     public function update(UpdateCentroRequest $request)
-{
-    $data = $request->validated();
+    {
+        $data = $request->validated();
 
-    $data['fotos'] = $request->file('fotos', []);
+        $data['fotos'] = $request->file('fotos', []);
 
-    $dto = ActualizarCentroDTO::fromArray($data);
+        $dto = ActualizarCentroDTO::fromArray($data);
 
-    $this->actualizarCentroAction->execute(
-        Auth::id(),
-        $dto
-    );
+        $this->actualizarCentroAction->execute(
+            Auth::id(),
+            $dto
+        );
 
-    return redirect()->route('home')
-        ->with('success', 'Información actualizada correctamente.');
-}
+        return redirect()->route('home')
+            ->with('success', 'Información actualizada correctamente.');
+    }
 
     public function show(int $id)
     {
-        $centro = $this
-            ->mostrarCentroAction
-            ->execute($id);
+        $centro = $this->mostrarCentroAction->execute($id);
 
-        return view(
-            'centros.show',
-            compact('centro')
-        );
+        $esFavorito = false;
+
+        if (auth()->check() && auth()->user()->rol === 'cliente') {
+            $esFavorito = $centro->favoritoDe
+                ->where('usuario_id', auth()->id())
+                ->isNotEmpty();
+        }
+
+        return view('centros.show', compact('centro', 'esFavorito'));
     }
 
     public function eliminarFoto(int $id)

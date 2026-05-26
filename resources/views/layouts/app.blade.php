@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     @livewireStyles
     <meta charset="UTF-8">
@@ -51,52 +52,59 @@
     </style>
 </head>
 @livewireScripts
+
 <body class="d-flex">
 
-@auth
-    <aside class="bg-dark text-white p-3 vh-100" style="width: 250px;">
+    @auth
+        <aside class="bg-dark text-white p-3 vh-100" style="width: 250px;">
 
-        <h4 class="mb-4 px-2">Mi Espacio</h4>
+            <h4 class="mb-4 px-2">Mi Espacio</h4>
 
-        @if(auth()->user()->rol === 'cliente')
-            <div class="sidebar-search mb-4 px-2">
-                <form action="{{ route('home') }}" method="GET">
-                    <div class="input-group">
-                        <input type="text" name="buscar" class="form-control form-control-sm"
-                               placeholder="Buscar centros..." value="{{ request('buscar') }}">
-                        <button class="btn btn-sm btn-search" type="submit">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        @endif
+            @if (auth()->user()->rol === 'cliente')
+                <div class="sidebar-search mb-4 px-2">
+                    <form action="{{ route('home') }}" method="GET">
+                        <div class="input-group">
+                            <input type="text" name="buscar" class="form-control form-control-sm"
+                                placeholder="Buscar centros..." value="{{ request('buscar') }}">
+                            <button class="btn btn-sm btn-search" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @endif
 
-        <hr>
+            <hr>
 
-        <a class="text-white d-block mb-2 sidebar-link" href="{{ route('home') }}">
-            <i class="bi bi-house-door me-2"></i> Home
-        </a>
-        <a class="text-white d-block mb-2 sidebar-link" href="{{ route('mensajes') }}">
-            <i class="bi bi-envelope me-2"></i> Mensajes
-        </a>
-        <a class="text-white d-block mb-2 sidebar-link" href="{{ route('citas') }}">
-            <i class="bi bi-calendar-event me-2"></i> Citas
-        </a>
+            <a class="text-white d-block mb-2 sidebar-link" href="{{ route('home') }}">
+                <i class="bi bi-house-door me-2"></i> Home
+            </a>
+            <a class="text-white d-block mb-2 sidebar-link" href="{{ route('mensajes') }}">
+                <i class="bi bi-envelope me-2"></i> Mensajes
+            </a>
+            <a class="text-white d-block mb-2 sidebar-link" href="{{ route('citas') }}">
+                <i class="bi bi-calendar-event me-2"></i> Citas
+            </a>
+            @if (auth()->user()->rol === 'cliente')
+                <a class="text-white d-block mb-2 sidebar-link" href="{{ route('favoritos') }}">
+                    <i class="bi bi-heart me-2"></i> Favoritos
+                </a>
+            @endif
 
-        <hr>
+            <hr>
 
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button class="btn btn-warning w-100">Cerrar Sesion</button>
-        </form>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button class="btn btn-warning w-100">Cerrar Sesion</button>
+            </form>
 
-    </aside>
-@endauth
+        </aside>
+    @endauth
 
-   <main class="p-4 flex-grow-1 @yield('main-class')">
+    <main class="p-4 flex-grow-1 @yield('main-class')">
         @yield('content')
     </main>
 
 </body>
+
 </html>

@@ -9,10 +9,10 @@
 <body class="bg-light">
 
 <nav class="p-3 bg-white shadow-sm d-flex justify-content-between">
-    <h4>Mi App</h4>
+    <h4>GlowMe</h4>
 
     <div>
-        <a href="{{ route('login') }}" class="btn btn-primary">Login</a>
+        <a href="{{ route('login') }}" class="btn btn-success" >Login</a>
         <a href="{{ route('register') }}" class="btn btn-outline-primary">Registro</a>
     </div>
 </nav>

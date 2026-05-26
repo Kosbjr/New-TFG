@@ -11,18 +11,16 @@ class CentroRepository
     ): ?Centro {
 
         return Centro::where(
-                'usuario_id',
-                $usuarioId
-            )
+            'usuario_id',
+            $usuarioId
+        )
             ->with('fotos')
             ->first();
     }
 
-    public function obtenerPorId(
-        int $id
-    ): Centro {
-
-        return Centro::with('fotos')
+    public function obtenerPorId(int $id): Centro
+    {
+        return Centro::with(['fotos', 'categorias', 'favoritoDe'])
             ->findOrFail($id);
     }
 

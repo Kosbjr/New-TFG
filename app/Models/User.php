@@ -64,4 +64,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Valoracion::class, 'usuario_id');
     }
+    public function favoritos()
+    {
+        return $this->hasMany(Favorito::class, 'usuario_id');
+    }
 }

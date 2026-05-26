@@ -59,4 +59,8 @@ class Centro extends Model
     {
         return $this->belongsToMany(Categoria::class, 'categoria_centro');
     }
+    public function favoritoDe()
+    {
+        return $this->hasMany(Favorito::class);
+    }
 }

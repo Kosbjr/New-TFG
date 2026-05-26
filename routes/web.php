@@ -9,6 +9,7 @@ use App\Http\Controllers\Centro\CentroController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Mensajes\MensajeController;
 use App\Http\Controllers\Admin\CategoriaController;
+use App\Http\Controllers\Favoritos\FavoritoController;
 // Web pública
 Route::get('/', function () {
     $categorias = \App\Models\Categoria::all();
@@ -59,6 +60,10 @@ Route::middleware('auth')->group(function () {
     // Mensajes
     Route::get('/mensajes',                              [MensajeController::class, 'index'])->name('mensajes');
     Route::get('/mensajes/{centroId}/{usuarioId}',       [MensajeController::class, 'chat'])->name('mensajes.chat');
+
+    //Favoritos
+    Route::get('/favoritos',              [FavoritoController::class, 'index'])->name('favoritos');
+    Route::post('/favoritos/{id}/toggle', [FavoritoController::class, 'toggle'])->name('favoritos.toggle');
 });
 
 

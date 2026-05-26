@@ -65,12 +65,21 @@
             @auth
                 @if (auth()->user()->rol === 'cliente')
                     <a href="{{ route('citas.create', $centro->id) }}" class="btn btn-primary w-100 mt-2">
-                        <i class="bi bi-calendar-plus"></i>  Agendar cita
+                        <i class="bi bi-calendar-plus"></i> Agendar cita
                     </a>
                     <a href="{{ route('mensajes.chat', ['centroId' => $centro->id, 'usuarioId' => auth()->id()]) }}"
                         class="btn btn-outline-primary w-100 mt-2">
                         <i class="bi bi-chat-dots"></i> Contactar
                     </a>
+                @endif
+                @if (auth()->user()->rol === 'cliente')
+                    <form action="{{ route('favoritos.toggle', $centro->id) }}" method="POST" class="mt-2">
+                        @csrf
+                        <button class="btn w-100 {{ $esFavorito ? 'btn-danger' : 'btn-outline-danger' }}">
+                            <i class="bi {{ $esFavorito ? 'bi-heart-fill' : 'bi-heart' }}"></i>
+                            {{ $esFavorito ? 'Quitar de favoritos' : 'Guardar en favoritos' }}
+                        </button>
+                    </form>
                 @endif
             @endauth
 
