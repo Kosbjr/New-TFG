@@ -10,10 +10,11 @@
 
 <nav class="p-3 bg-white shadow-sm d-flex justify-content-between">
     <h4>GlowMe</h4>
+    <img src="{{ asset('storage/logo/GlowmeLogo.png') }}" alt="GlowMe Logo" style="height:50px;">
 
     <div>
         <a href="{{ route('login') }}" class="btn btn-success" >Login</a>
-        <a href="{{ route('register') }}" class="btn btn-outline-primary">Registro</a>
+        <a href="{{ route('register') }}" class="btn btn-outline-success">Registro</a>
     </div>
 </nav>
 

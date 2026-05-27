@@ -9,6 +9,19 @@
     <title>@yield('title')</title>
 
     <style>
+        .sidebar-fixed {
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        main {
+            margin-left: 250px;
+        }
+
         .sidebar-link {
             text-decoration: none;
             padding: 10px 15px;
@@ -56,26 +69,35 @@
             background-color: #16a085;
             color: white;
         }
+
+        .with-sidebar {
+            margin-left: 250px;
+        }
+
+        .no-sidebar {
+            margin-left: 0;
+        }
     </style>
 </head>
 @livewireScripts
 
-<body class="d-flex">
+<body>
 
     @auth
-        <aside class="bg-dark text-white p-3 vh-100" style="width: 250px;">
+        <aside class="bg-dark text-white p-3 sidebar-fixed">
 
-            <h4 class="mb-4 px-2">Mi Espacio</h4>
+            <h4 class="mb-4 px-2">Mi Espacio <img src="{{ asset('storage/logo/GlowmeLogo.png') }}" alt="GlowMe Logo"
+                    style="height:40px;"></h4>
 
             @if (auth()->user()->rol === 'cliente')
                 <div class="sidebar-search mb-4 px-2">
                     <form action="{{ route('home') }}" method="GET">
-                        {{-- Mantenemos las categorías activas para que no se pisen al buscar desde la barra lateral --}}
-                        @if(request('categorias'))
+
+                        @if (request('categorias'))
                             <input type="hidden" name="categorias" value="{{ request('categorias') }}">
                         @endif
 
-                        {{-- Input superior de texto --}}
+                        {{-- Barra de busqueda --}}
                         <div class="input-group mb-2">
                             <input type="text" name="buscar" class="form-control form-control-sm"
                                 placeholder="Buscar centros..." value="{{ request('buscar') }}">
@@ -84,13 +106,12 @@
                             </button>
                         </div>
 
-                        {{-- Desplegable inferior de Comunidades Autónomas --}}
-                        {{-- Se envía automáticamente al cambiar la opción (onchange) --}}
+                        {{-- Desplegable  de comunidades autónomas --}}
                         <select name="ciudad" class="form-select form-select-sm" onchange="this.form.submit()">
                             <option value="">Todas las comunidades</option>
                             {{-- Condicional de seguridad por si la variable compartida aún no se ha cargado --}}
-                            @if(isset($comunidades))
-                                @foreach($comunidades as $slug => $nombre)
+                            @if (isset($comunidades))
+                                @foreach ($comunidades as $slug => $nombre)
                                     <option value="{{ $slug }}" {{ request('ciudad') === $slug ? 'selected' : '' }}>
                                         {{ $nombre }}
                                     </option>
@@ -128,7 +149,7 @@
         </aside>
     @endauth
 
-    <main class="p-4 flex-grow-1 @yield('main-class')">
+    <main class="p-4 flex-grow-1 {{ auth()->check() ? 'with-sidebar' : 'no-sidebar' }} @yield('main-class')">
         @yield('content')
     </main>
 

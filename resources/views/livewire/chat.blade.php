@@ -11,7 +11,7 @@
 
             <div class="d-flex {{ $esMio ? 'justify-content-end' : 'justify-content-start' }} mb-2">
                 <div style="max-width: 70%; padding: 10px 14px; border-radius: 18px;
-                            background: {{ $esMio ? '#0d6efd' : '#ffffff' }};
+                            background: {{ $esMio ? '#16a085' : '#ffffff' }};
                             color: {{ $esMio ? '#ffffff' : '#212529' }};
                             box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
                     <p class="mb-0" style="font-size: 14px;">{{ $mensaje->mensaje }}</p>
@@ -32,19 +32,24 @@
                wire:keydown.enter="enviar"
                class="form-control"
                placeholder="Escribe un mensaje...">
-        <button wire:click="enviar" class="btn btn-primary px-4">
+
+        <button wire:click="enviar"
+                class="btn px-4"
+                style="background-color:#16a085; border-color:#16a085; color:white;">
             Enviar
         </button>
     </div>
 
-    {{-- Auto-scroll al último mensaje --}}
+    {{-- Auto-scroll --}}
     <script>
         document.addEventListener('livewire:navigated', scrollChat);
         document.addEventListener('livewire:update', scrollChat);
+
         function scrollChat() {
             const box = document.getElementById('chat-box');
             if (box) box.scrollTop = box.scrollHeight;
         }
+
         scrollChat();
     </script>
 </div>

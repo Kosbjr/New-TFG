@@ -3,21 +3,23 @@
 @section('title', 'Home')
 
 @section('content')
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <h2>BIENVENID@ A GlowMe</h2>
+
 
     @if ($modo === 'cliente')
         {{-- Filtro de categorías múltiple --}}
         @php
-            // 1. Capturamos las categorías actualmente activas desde la URL (ej: "peluqueria,manicura")
-            // Si no hay ninguna, inicializamos un array vacío.
+
             $categoriasActivas = request('categorias') ? explode(',', request('categorias')) : [];
         @endphp
 
         <div class="d-flex flex-wrap gap-2 mb-4">
-            {{-- Botón "Todos": Borra los parámetros de categorías de la URL --}}
-            <a href="{{ route('home') }}"
-                class="btn btn-sm {{ empty($categoriasActivas) ? 'btn-primary' : 'btn-outline-secondary' }}">
+
+            <a href="{{ route('home') }}" class="btn btn-sm"
+                style="{{ empty($categoriasActivas)
+                    ? 'background-color:#16a085; border-color:#16a085; color:white;'
+                    : 'border-color:#16a085; color:#16a085;' }}">
                 Todos
             </a>
 
@@ -33,9 +35,10 @@
                     $parametroUrl = !empty($nuevasCategorias) ? implode(',', $nuevasCategorias) : null;
                 @endphp
 
-                {{-- Renderizado del botón con su URL dinámica --}}
-                <a href="{{ route('home', ['categorias' => $parametroUrl]) }}"
-                    class="btn btn-sm {{ $estaActiva ? 'btn-primary' : 'btn-outline-secondary' }}">
+                <a href="{{ route('home', ['categorias' => $parametroUrl]) }}" class="btn btn-sm"
+                    style="{{ $estaActiva
+                        ? 'background-color:#16a085; border-color:#16a085; color:white;'
+                        : 'border-color:#16a085; color:dark-grey;' }}">
                     <i class="bi {{ $cat->icono }}"></i> {{ $cat->nombre }}
                 </a>
             @endforeach

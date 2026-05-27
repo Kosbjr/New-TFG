@@ -13,7 +13,8 @@ class CitaRepository
     {
         return Cita::where('centro_id', $centroId)
             ->with(['usuario', 'servicio'])
-            ->orderBy('fecha')->orderBy('hora')
+            ->orderByDesc('fecha')
+            ->orderByDesc('hora')
             ->get();
     }
 
@@ -21,7 +22,8 @@ class CitaRepository
     {
         return Cita::where('usuario_id', $usuarioId)
             ->with(['centro', 'servicio'])
-            ->orderBy('fecha')->orderBy('hora')
+            ->orderByDesc('fecha')
+            ->orderByDesc('hora')
             ->get();
     }
 
