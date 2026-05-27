@@ -1,62 +1,42 @@
 <?php
-
 namespace App\Http\Controllers\Mensajes;
 
 use App\Http\Controllers\Controller;
-use App\Models\Mensaje;
-use App\Models\Centro;
+use App\Actions\Mensajes\ListarConversacionesAccion;
+use App\Actions\Mensajes\ObtenerDatosChatAccion;
+use App\DTOs\Mensajes\CargarChatDTO;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class MensajeController extends Controller
 {
-    public function index()
+    /**
+     * Muestra la bandeja de entrada con el listado de conversaciones.
+     *
+     * @param \App\Actions\Mensajes\ListarConversacionesAccion $listarConversacionesAccion
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function index(ListarConversacionesAccion $listarConversacionesAccion)
     {
-        $user = Auth::user();
-
-        if ($user->rol === 'centro') {
-            $centro = Centro::where('usuario_id', $user->id)->firstOrFail();
-
-            $conversaciones = Mensaje::where('centro_id', $centro->id)
-                ->with(['usuario', 'centro'])
-                ->select('usuario_id', 'centro_id',
-                    DB::raw('MAX(id) as id'),
-                    DB::raw('MAX(created_at) as created_at'),
-                    DB::raw('SUM(leido = 0 AND remitente = "usuario") as no_leidos'))
-                ->groupBy('usuario_id', 'centro_id')
-                ->orderByDesc('created_at')
-                ->get()
-                ->map(function ($conv) {
-                    $conv->mensaje = Mensaje::where('centro_id', $conv->centro_id)
-                        ->where('usuario_id', $conv->usuario_id)
-                        ->latest()->value('mensaje');
-                    return $conv;
-                });
-        } else {
-            $conversaciones = Mensaje::where('usuario_id', $user->id)
-                ->with(['usuario', 'centro'])
-                ->select('usuario_id', 'centro_id',
-                    DB::raw('MAX(id) as id'),
-                    DB::raw('MAX(created_at) as created_at'),
-                    DB::raw('SUM(leido = 0 AND remitente = "centro") as no_leidos'))
-                ->groupBy('usuario_id', 'centro_id')
-                ->orderByDesc('created_at')
-                ->get()
-                ->map(function ($conv) {
-                    $conv->mensaje = Mensaje::where('centro_id', $conv->centro_id)
-                        ->where('usuario_id', $conv->usuario_id)
-                        ->latest()->value('mensaje');
-                    return $conv;
-                });
-        }
+        $conversaciones = $listarConversacionesAccion->ejecutar(Auth::user());
 
         return view('mensajes.index', compact('conversaciones'));
     }
 
-    public function chat($centroId, $usuarioId)
+    /**
+     * Carga la pantalla de la sala de chat entre un centro y un usuario.
+     *
+     * @param mixed $centroId
+     * @param mixed $usuarioId
+     * @param \App\Actions\Mensajes\ObtenerDatosChatAccion $obtenerDatosChatAccion
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function chat($centroId, $usuarioId, ObtenerDatosChatAccion $obtenerDatosChatAccion)
     {
+        $dto = CargarChatDTO::fromRoute($centroId, $usuarioId);
 
-        $centro = Centro::findOrFail($centroId);
+        $centro = $obtenerDatosChatAccion->ejecutar($dto);
+        $usuarioId = $dto->usuarioId;
+
         return view('mensajes.chat', compact('centro', 'usuarioId'));
     }
 }

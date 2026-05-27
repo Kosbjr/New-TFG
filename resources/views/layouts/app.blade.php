@@ -22,7 +22,8 @@
             padding-left: 20px;
         }
 
-        .sidebar-search .form-control {
+        .sidebar-search .form-control,
+        .sidebar-search .form-select {
             background-color: #2c3e50;
             border: 1px solid #4f5d73;
             color: #ffffff;
@@ -32,11 +33,17 @@
             color: #a0aab2;
         }
 
-        .sidebar-search .form-control:focus {
+        .sidebar-search .form-control:focus,
+        .sidebar-search .form-select:focus {
             background-color: #2c3e50;
             border-color: #1abc9c;
             box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.25);
             color: #ffffff;
+        }
+
+        /* Estilo personalizado para la flecha del select oscuro en Bootstrap */
+        .sidebar-search .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
         }
 
         .sidebar-search .btn-search {
@@ -63,13 +70,33 @@
             @if (auth()->user()->rol === 'cliente')
                 <div class="sidebar-search mb-4 px-2">
                     <form action="{{ route('home') }}" method="GET">
-                        <div class="input-group">
+                        {{-- Mantenemos las categorías activas para que no se pisen al buscar desde la barra lateral --}}
+                        @if(request('categorias'))
+                            <input type="hidden" name="categorias" value="{{ request('categorias') }}">
+                        @endif
+
+                        {{-- Input superior de texto --}}
+                        <div class="input-group mb-2">
                             <input type="text" name="buscar" class="form-control form-control-sm"
                                 placeholder="Buscar centros..." value="{{ request('buscar') }}">
                             <button class="btn btn-sm btn-search" type="submit">
                                 <i class="bi bi-search"></i>
                             </button>
                         </div>
+
+                        {{-- Desplegable inferior de Comunidades Autónomas --}}
+                        {{-- Se envía automáticamente al cambiar la opción (onchange) --}}
+                        <select name="ciudad" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">Todas las comunidades</option>
+                            {{-- Condicional de seguridad por si la variable compartida aún no se ha cargado --}}
+                            @if(isset($comunidades))
+                                @foreach($comunidades as $slug => $nombre)
+                                    <option value="{{ $slug }}" {{ request('ciudad') === $slug ? 'selected' : '' }}>
+                                        {{ $nombre }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
                     </form>
                 </div>
             @endif

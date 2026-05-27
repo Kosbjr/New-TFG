@@ -16,6 +16,7 @@ class Centro extends Model
         'telefono',
         'descripcion',
         'ubicacion',
+        'comunidad_autonoma',
         'latitud',
         'longitud',
     ];

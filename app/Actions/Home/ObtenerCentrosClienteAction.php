@@ -7,22 +7,35 @@ use Illuminate\Support\Collection;
 
 class ObtenerCentrosClienteAction
 {
-    public function execute(?string $categoria, ?string $buscar): Collection
+    /**
+     * Ejecuta la filtración estricta de centros para el cliente.
+     * * @param array $categorias Slugs de las categorías obligatorias combinadas
+     * @param string|null $buscar Término de búsqueda por texto
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function execute(array $categorias, ?string $buscar, ?string $ciudad)
     {
-        return Centro::latest()
-            ->with(['fotos', 'categorias'])
-            ->when($categoria, function ($q) use ($categoria) {
-                $q->whereHas('categorias', function ($q) use ($categoria) {
-                    $q->where('slug', $categoria);
+        $query = Centro::query();
+
+        // Filtro por Comunidad Autónoma usando la nueva columna
+        if ($ciudad) {
+            $query->where('comunidad_autonoma', $ciudad);
+        }
+
+        // Filtro Combinado Estricto de Categorías
+        if (!empty($categorias)) {
+            foreach ($categorias as $slug) {
+                $query->whereHas('categorias', function ($q) use ($slug) {
+                    $q->where('slug', $slug);
                 });
-            })
-            ->when($buscar, function ($q) use ($buscar) {
-                $q->where(function ($subquery) use ($buscar) {
-                    $subquery->where('nombre', 'like', '%' . $buscar . '%')
-                             ->orWhere('descripcion', 'like', '%' . $buscar . '%');
-                });
-            })
-            ->take(12)
-            ->get();
+            }
+        }
+
+        // Filtro de búsqueda por texto
+        if ($buscar) {
+            $query->where('nombre', 'LIKE', "%{$buscar}%");
+        }
+
+        return $query->with(['fotos', 'categorias'])->get();
     }
 }

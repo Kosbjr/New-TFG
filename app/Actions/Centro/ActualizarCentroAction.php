@@ -27,6 +27,7 @@ class ActualizarCentroAction
                     'ubicacion' => $dto->ubicacion,
                     'telefono' => $dto->telefono,
                     'descripcion' => $dto->descripcion,
+                    'comunidad_autonoma' => $dto->comunidad_autonoma,
                 ]
             );
 

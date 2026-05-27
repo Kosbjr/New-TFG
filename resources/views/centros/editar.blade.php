@@ -20,14 +20,13 @@
             </div>
         @endif
 
-
-     {{-- forulario para editar el centro --}}
+        {{-- Formulario para editar el centro --}}
         <form action="{{ route('centro.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
             <div class="mb-3">
-                <label class="form-label">Nombre del centro *</label>
+                <label class="form-label">Nombre del centro</label>
                 <input type="text" name="nombre" class="form-control" value="{{ old('nombre', $centro?->nombre) }}"
                     required>
             </div>
@@ -44,7 +43,25 @@
                     value="{{ old('ubicacion', $centro?->ubicacion) }}" placeholder="Ej: Calle Gran Vía 14, Madrid">
 
                 <div class="form-text">
-                    Esta dirección se usará para Google Maps.
+                    Esta dirección se usará para el enlace de Google Maps.
+                </div>
+            </div>
+
+            {{--Selección de Comunidad Autónoma para Filtros --}}
+            <div class="mb-3">
+                <label class="form-label">Comunidad Autónoma</label>
+                <select name="comunidad_autonoma" class="form-select" required>
+                    <option value="">-- Selecciona la comunidad donde operas --</option>
+                    @if(isset($comunidades))
+                        @foreach($comunidades as $slug => $nombre)
+                            <option value="{{ $slug }}" {{ old('comunidad_autonoma', $centro?->comunidad_autonoma) === $slug ? 'selected' : '' }}>
+                                {{ $nombre }}
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+                <div class="form-text text-muted">
+                    Es obligatorio para que los clientes puedan encontrarte en los filtros por zona.
                 </div>
             </div>
 
@@ -59,7 +76,7 @@
                 <textarea name="descripcion" rows="4" class="form-control">{{ old('descripcion', $centro?->descripcion) }}</textarea>
             </div>
 
-            {{-- fotos del centro --}}
+            {{-- Fotos del centro --}}
             <div class="mb-4">
                 <label class="form-label">Fotos del establecimiento</label>
 
@@ -78,7 +95,7 @@
                                            background:rgba(0,0,0,0.6);color:#fff;
                                            border:none;border-radius:50%;
                                            width:22px;height:22px;font-size:12px;cursor:pointer;">
-                                    ✕
+                                    <i class="bi bi-x-circle"></i>
                                 </button>
 
                             </div>
@@ -100,7 +117,6 @@
 
         </form>
 
-
         @if (!empty($centro) && $centro->fotos && $centro->fotos->count())
             @foreach ($centro->fotos as $foto)
                 <form id="delete-foto-{{ $foto->id }}"
@@ -112,8 +128,7 @@
             @endforeach
         @endif
 
-
-        {{-- SECCIÓN CATEGORÍAS --}}
+        {{-- categorias --}}
         <div class="card border-0 shadow-sm p-4 mt-4" style="border-radius:12px">
 
             <h5 class="mb-3">Categorías del centro</h5>

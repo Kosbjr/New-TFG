@@ -7,15 +7,35 @@
     <h2>BIENVENID@ A GlowMe</h2>
 
     @if ($modo === 'cliente')
-        {{-- Filtro de categorías --}}
+        {{-- Filtro de categorías múltiple --}}
+        @php
+            // 1. Capturamos las categorías actualmente activas desde la URL (ej: "peluqueria,manicura")
+            // Si no hay ninguna, inicializamos un array vacío.
+            $categoriasActivas = request('categorias') ? explode(',', request('categorias')) : [];
+        @endphp
+
         <div class="d-flex flex-wrap gap-2 mb-4">
+            {{-- Botón "Todos": Borra los parámetros de categorías de la URL --}}
             <a href="{{ route('home') }}"
-                class="btn btn-sm {{ !request('categoria') ? 'btn-primary' : 'btn-outline-secondary' }}">
+                class="btn btn-sm {{ empty($categoriasActivas) ? 'btn-primary' : 'btn-outline-secondary' }}">
                 Todos
             </a>
+
             @foreach ($categorias as $cat)
-                <a href="{{ route('home', ['categoria' => $cat->slug]) }}"
-                    class="btn btn-sm {{ request('categoria') === $cat->slug ? 'btn-primary' : 'btn-outline-secondary' }}">
+                @php
+                    $estaActiva = in_array($cat->slug, $categoriasActivas);
+                    if ($estaActiva) {
+                        $nuevasCategorias = array_diff($categoriasActivas, [$cat->slug]);
+                    } else {
+                        $nuevasCategorias = array_merge($categoriasActivas, [$cat->slug]);
+                    }
+
+                    $parametroUrl = !empty($nuevasCategorias) ? implode(',', $nuevasCategorias) : null;
+                @endphp
+
+                {{-- Renderizado del botón con su URL dinámica --}}
+                <a href="{{ route('home', ['categorias' => $parametroUrl]) }}"
+                    class="btn btn-sm {{ $estaActiva ? 'btn-primary' : 'btn-outline-secondary' }}">
                     <i class="bi {{ $cat->icono }}"></i> {{ $cat->nombre }}
                 </a>
             @endforeach

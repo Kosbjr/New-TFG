@@ -12,12 +12,23 @@ use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
+    /**
+     * @param ObtenerCentrosGuestAction $obtenerCentrosGuestAction
+     * @param ObtenerCentrosClienteAction $obtenerCentrosClienteAction
+     * @param ObtenerCentroDelUsuarioAction $obtenerCentroDelUsuarioAction
+     */
     public function __construct(
         protected ObtenerCentrosGuestAction   $obtenerCentrosGuestAction,
         protected ObtenerCentrosClienteAction $obtenerCentrosClienteAction,
         protected ObtenerCentroDelUsuarioAction $obtenerCentroDelUsuarioAction,
     ) {}
 
+    /**
+     * Muestra la página de inicio con los filtros aplicados.
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\View
+     */
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -31,7 +42,6 @@ class HomeController extends Controller
         }
 
         return match ($user->rol) {
-
             'centro' => view('home', [
                 'modo'   => 'centro',
                 'centro' => $this->obtenerCentroDelUsuarioAction
@@ -40,8 +50,13 @@ class HomeController extends Controller
 
             default => view('home', [
                 'modo'       => 'cliente',
+                // Convertimos el string "cat1,cat2" en un array plano de PHP
                 'centros'    => $this->obtenerCentrosClienteAction
-                    ->execute($request->categoria, $request->buscar),
+                    ->execute(
+                        $request->categorias ? explode(',', $request->categorias) : [],
+                        $request->buscar,
+                        $request->ciudad
+                    ),
                 'categorias' => Categoria::all(),
             ]),
         };

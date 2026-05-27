@@ -5,12 +5,13 @@ namespace App\DTOs\Centro;
 class ActualizarCentroDTO
 {
     public function __construct(
-        public readonly string $nombre,
-        public readonly ?string $direccion,
-        public readonly ?string $ubicacion,
-        public readonly ?string $telefono,
-        public readonly ?string $descripcion,
-        public readonly array $fotos = [],
+        public string $nombre,
+        public ?string $direccion,
+        public ?string $ubicacion,
+        public ?string $telefono,
+        public ?string $descripcion,
+        public string $comunidad_autonoma,
+        public array $fotos = []
     ) {}
 
     public static function fromArray(array $data): self
@@ -21,7 +22,8 @@ class ActualizarCentroDTO
             ubicacion: $data['ubicacion'] ?? null,
             telefono: $data['telefono'] ?? null,
             descripcion: $data['descripcion'] ?? null,
-            fotos: $data['fotos'] ?? [],
+            comunidad_autonoma: $data['comunidad_autonoma'],
+            fotos: $data['fotos'] ?? []
         );
     }
 }
